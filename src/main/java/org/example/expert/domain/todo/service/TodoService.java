@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-//@Transactional(readOnly = true) // 레벨1 코드개선 퀴즈 영속성 컨텍스트를 읽기전용으로 두면 CRUD 중 R만 작동
+//@Transactional(readOnly = true) // 레벨1_1 코드개선 퀴즈 영속성 컨텍스트를 읽기전용으로 두면 CRUD 중 R만 작동
 public class TodoService {
 
     private final TodoRepository todoRepository;
@@ -47,10 +47,23 @@ public class TodoService {
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> getTodos(int page, int size, String keyword, String start, String end) {
         Pageable pageable = PageRequest.of(page - 1, size);
-
         Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        // 레벨 1_5 날씨 검색값 있을경우는 like 없을경우 일반 전체조회
+        if(keyword != null){
+            todos = todoRepository.findAllByKeyword(pageable, keyword);
+        }
+
+        // 레벨 1_5 날짜 검색값 있을경우 between 없을 경우 일반조회
+        if(start != null && end != null){
+            todos = todoRepository.findAllByStartAndEnd(pageable, start, end);
+        }
+
+        // 레벨 1_5 날씨와 날짜가 동시에 검색될 경우
+        if(keyword != null && start != null && end != null) {
+            todos = todoRepository.findAllByKeywordAndStartAndEnd(pageable, keyword, start, end);
+        }
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
