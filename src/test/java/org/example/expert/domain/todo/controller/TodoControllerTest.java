@@ -35,9 +35,9 @@ class TodoControllerTest {
         // given
         long todoId = 1L;
         String title = "title";
-        AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
+        AuthUser authUser = new AuthUser(1L, "email", UserRole.USER, "nickname");
         User user = User.fromAuthUser(authUser);
-        UserResponse userResponse = new UserResponse(user.getId(), user.getEmail());
+        UserResponse userResponse = new UserResponse(user.getId(), user.getEmail(), user.getNickName());
         TodoResponse response = new TodoResponse(
                 todoId,
                 title,
@@ -67,11 +67,19 @@ class TodoControllerTest {
         when(todoService.getTodo(todoId))
                 .thenThrow(new InvalidRequestException("Todo not found"));
 
-        // then
+        // then - 기존코드
+//        mockMvc.perform(get("/todos/{todoId}", todoId))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.status").value(HttpStatus.OK.name()))
+//                .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+//                .andExpect(jsonPath("$.message").value("Todo not found"));
+
+        // then - 1_4 테스트코드 퀴즈 (예외가 발생해야하는데 기존코드에서 보면 isOk 그리고 200 code를 반환함.)
+        // 400번대 clientError를 status로 세팅 후 아래에 BAD_REQUEST로 변경해줘야한다.
         mockMvc.perform(get("/todos/{todoId}", todoId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.name()))
-                .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.message").value("Todo not found"));
+            .andExpect(status().is4xxClientError())
+            .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
+            .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
+            .andExpect(jsonPath("$.message").value("Todo not found"));
     }
 }
