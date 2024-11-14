@@ -49,6 +49,7 @@ public class TodoService {
 
     public Page<TodoResponse> getTodos(int page, int size, String keyword, String start, String end) {
         Pageable pageable = PageRequest.of(page - 1, size);
+
         Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
         // 레벨 1_5 날씨 검색값 있을경우는 like 없을경우 일반 전체조회
         if(keyword != null){
@@ -77,7 +78,7 @@ public class TodoService {
     }
 
     public TodoResponse getTodo(long todoId) {
-        Todo todo = todoRepository.findByIdWithUser(todoId)
+        Todo todo = todoRepository.findByIdWithUserCustom(todoId) // 2_8 QueryDSL로 변경한 커스텀쿼리메서드
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
         User user = todo.getUser();
