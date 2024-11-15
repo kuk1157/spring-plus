@@ -1,5 +1,6 @@
 package org.example.expert.domain.manager.service;
 
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
@@ -30,9 +31,13 @@ public class ManagerService {
     private final TodoRepository todoRepository;
 
     @Transactional
-    public ManagerSaveResponse saveManager(AuthUser authUser, long todoId, ManagerSaveRequest managerSaveRequest) {
-        // 일정을 만든 유저
-        User user = User.fromAuthUser(authUser);
+    public ManagerSaveResponse saveManager(Principal principal, long todoId, ManagerSaveRequest managerSaveRequest) {
+        // Principal 인터페이스에 가져온 userId로 DB 조회하여 사용자 존재 처리 후 user 객체 사용
+        Long userId = Long.valueOf(principal.getName()); // 회원 id 가공
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new InvalidRequestException("User not found"));
+
+
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
@@ -74,8 +79,11 @@ public class ManagerService {
     }
 
     @Transactional
-    public void deleteManager(AuthUser authUser, long todoId, long managerId) {
-        User user = User.fromAuthUser(authUser);
+    public void deleteManager(Principal principal, long todoId, long managerId) {
+        // Principal 인터페이스에 가져온 userId로 DB 조회하여 사용자 존재 처리 후 user 객체 사용
+        Long userId = Long.valueOf(principal.getName()); // 회원 id 가공
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new InvalidRequestException("User not found"));
 
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));

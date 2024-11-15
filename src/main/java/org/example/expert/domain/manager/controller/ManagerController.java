@@ -1,6 +1,7 @@
 package org.example.expert.domain.manager.controller;
 
 import jakarta.validation.Valid;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.common.annotation.Auth;
 import org.example.expert.domain.common.dto.AuthUser;
@@ -21,11 +22,11 @@ public class ManagerController {
 
     @PostMapping("/todos/{todoId}/managers")
     public ResponseEntity<ManagerSaveResponse> saveManager(
-            @Auth AuthUser authUser,
+            Principal principal,
             @PathVariable long todoId,
             @Valid @RequestBody ManagerSaveRequest managerSaveRequest
     ) {
-        return ResponseEntity.ok(managerService.saveManager(authUser, todoId, managerSaveRequest));
+        return ResponseEntity.ok(managerService.saveManager(principal, todoId, managerSaveRequest));
     }
 
     @GetMapping("/todos/{todoId}/managers")
@@ -35,10 +36,10 @@ public class ManagerController {
 
     @DeleteMapping("/todos/{todoId}/managers/{managerId}")
     public void deleteManager(
-            @Auth AuthUser authUser,
+            Principal principal,
             @PathVariable long todoId,
             @PathVariable long managerId
     ) {
-        managerService.deleteManager(authUser, todoId, managerId);
+        managerService.deleteManager(principal, todoId, managerId);
     }
 }

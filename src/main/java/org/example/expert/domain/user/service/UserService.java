@@ -1,5 +1,6 @@
 package org.example.expert.domain.user.service;
 
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.config.PasswordEncoder;
 import org.example.expert.domain.common.exception.InvalidRequestException;
@@ -24,7 +25,9 @@ public class UserService {
     }
 
     @Transactional
-    public void changePassword(long userId, UserChangePasswordRequest userChangePasswordRequest) {
+    public void changePassword(Principal principal, UserChangePasswordRequest userChangePasswordRequest) {
+        Long userId = Long.valueOf(principal.getName()); // 회원 id 가공
+
         validateNewPassword(userChangePasswordRequest);
 
         User user = userRepository.findById(userId)
@@ -39,6 +42,7 @@ public class UserService {
         }
 
         user.changePassword(passwordEncoder.encode(userChangePasswordRequest.getNewPassword()));
+        System.out.println("회원번호 "+userId+" / 닉네임 : "+user.getNickName()+"님의 비밀번호가 변경되었습니다.");
     }
 
     private static void validateNewPassword(UserChangePasswordRequest userChangePasswordRequest) {

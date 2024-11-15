@@ -1,5 +1,6 @@
 package org.example.expert.domain.comment.service;
 
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.comment.dto.request.CommentSaveRequest;
 import org.example.expert.domain.comment.dto.response.CommentResponse;
@@ -12,6 +13,7 @@ import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
+import org.example.expert.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +27,16 @@ public class CommentService {
 
     private final TodoRepository todoRepository;
     private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public CommentSaveResponse saveComment(AuthUser authUser, long todoId, CommentSaveRequest commentSaveRequest) {
-        User user = User.fromAuthUser(authUser);
+    public CommentSaveResponse saveComment(Principal principal, long todoId, CommentSaveRequest commentSaveRequest) {
+        // 레벨 2_9
+        // Principal 인터페이스에 가져온 userId로 DB 조회하여 사용자 존재 처리 후 user 객체 사용
+        Long userId = Long.valueOf(principal.getName()); // 회원 id 가공
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new InvalidRequestException("User not found"));
+
         Todo todo = todoRepository.findById(todoId).orElseThrow(() ->
                 new InvalidRequestException("Todo not found"));
 
