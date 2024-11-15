@@ -56,6 +56,8 @@ public class JwtUtil {
         throw new ServerException("Not Found Token");
     }
 
+
+
     public Claims extractClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -63,4 +65,12 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    // 2_9 회원 Id 추출
+    public Long extractUserId(String token) {
+        Claims claims = extractClaims(token);
+        String subject = claims.getSubject();
+        return Long.parseLong(subject);
+    }
+
 }
