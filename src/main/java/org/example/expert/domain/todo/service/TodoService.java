@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-//@Transactional(readOnly = true) // 레벨1_1 코드개선 퀴즈 영속성 컨텍스트를 읽기전용으로 두면 CRUD 중 R만 작동
+//@Transactional(readOnly = true) // 레벨1_1 코드개선 퀴즈 트랜잭션을 읽기전용으로 두면 CRUD 중 R만 작동
 public class TodoService {
 
     private final TodoRepository todoRepository;
