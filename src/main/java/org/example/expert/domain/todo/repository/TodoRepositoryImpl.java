@@ -56,8 +56,8 @@ public class TodoRepositoryImpl implements TodoRepositoryCustom {
                 comment.id.count().as("commentCount"),
                 manager.id.count().as("managerCount")))
             .from(todo)
-            .leftJoin(comment).on(comment.todo.id.eq(todo.id)) // 수정: todoId -> todo.id
-            .leftJoin(manager).on(manager.todo.id.eq(todo.id)) // 수정: todoId -> todo.id
+            .leftJoin(comment).on(comment.todo.id.eq(todo.id))
+            .leftJoin(manager).on(manager.todo.id.eq(todo.id))
             .where(todo.title.contains(title)
                 .and(todo.user.id.eq(
                     JPAExpressions.select(user.id)
@@ -66,7 +66,8 @@ public class TodoRepositoryImpl implements TodoRepositoryCustom {
                 ))
                 .and(todo.createdAt.between(startDateTime, endDateTime))
         )
-        .groupBy(todo.id, todo.title);
+        .groupBy(todo.id, todo.title)
+        .orderBy(todo.createdAt.desc());
 
         // 페이징 처리
         long total = query.fetchCount(); // 전체 건수
