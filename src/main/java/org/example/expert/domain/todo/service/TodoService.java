@@ -8,6 +8,7 @@ import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
+import org.example.expert.domain.todo.dto.response.TodoSearch;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-//@Transactional(readOnly = true) // 레벨1_1 코드개선 퀴즈 영속성 컨텍스트를 읽기전용으로 두면 CRUD 중 R만 작동
+//@Transactional(readOnly = true) // 레벨1_1 코드개선 퀴즈 트랜잭션을 읽기전용으로 두면 CRUD 중 R만 작동
 public class TodoService {
 
     private final TodoRepository todoRepository;
@@ -99,5 +100,33 @@ public class TodoService {
                 todo.getCreatedAt(),
                 todo.getModifiedAt()
         );
+    }
+
+    // 3-10 QueryDSL 검색
+    public Page<TodoSearch> searchTodos(int page, int size, String title, String start, String end, String nickName) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        if(title == null){
+            throw new InvalidRequestException("제목을 입력해주세요.");
+        }
+
+        if(nickName == null){
+            throw new InvalidRequestException("닉네임을 입력해주세요.");
+        }
+
+        if(start == null){
+            throw new InvalidRequestException("시작 범위날짜를 입력해주세요");
+        }
+
+        if(end == null){
+            throw new InvalidRequestException("종료 범위날짜를 입력해주세요");
+        }
+
+        Page<TodoSearch> todos = todoRepository.findTodoWithCommentAndManagerCounts(pageable, title, start, end, nickName);
+        return todos.map(todo -> new TodoSearch(
+            todo.getId(),
+            todo.getTitle(),
+            todo.getMangerCount(),
+            todo.getCommentCount()
+        ));
     }
 }
